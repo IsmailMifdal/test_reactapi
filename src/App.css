@@ -32,7 +32,130 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ── Main content area ── */
+.App-main {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-color: #f5f7fa;
+  min-height: calc(100vh - 100px);
+}
+
+/* ── Registration Form ── */
+.registration-form {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.registration-form h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.4rem;
+  color: #282c34;
+  text-align: center;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  color: #282c34;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #61dafb;
+}
+
+/* Invalid field highlight */
+.form-group input.input-error {
+  border-color: #e03c3c;
+  background-color: #fff5f5;
+}
+
+.form-error {
+  font-size: 0.78rem;
+  color: #e03c3c;
+}
+
+.registration-form button[type='submit'] {
+  padding: 0.65rem;
+  background-color: #282c34;
+  color: #61dafb;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.registration-form button[type='submit']:not(:disabled):hover {
+  background-color: #3a3f4b;
+}
+
+/* Disabled state */
+.registration-form button[type='submit']:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Toaster ── */
+@keyframes slide-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.toast {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.2rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slide-in 0.3s ease-out;
+}
+
+.toast-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-left: 4px solid #10b981;
 }
