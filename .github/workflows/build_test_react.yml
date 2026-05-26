@@ -56,11 +56,18 @@ jobs:
 
       - name: build and publish package on NPM
         run: |
-          git config --global user.email "juputepix5@gmail.com"
-          git config --global user.name "ZomboyTepix"
-          npm run build-npm-ci
-          npm version patch
-          npm publish
+         
+          LOCAL_VERSION=$(node -p "require('./package.json').version")
+          NPM_VERSION=$(npm view react_julio version 2>/dev/null || echo "0.0.0")
+          echo "Version locale    : $LOCAL_VERSION"
+          echo "Version sur NPM   : $NPM_VERSION"
+          if [ "$LOCAL_VERSION" != "$NPM_VERSION" ]; then
+            echo "Nouvelle version détectée → publication de $LOCAL_VERSION..."
+            npm run build-npm-ci
+            npm publish
+          else
+            echo "Version $LOCAL_VERSION déjà publiée sur NPM → publication ignorée."
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
