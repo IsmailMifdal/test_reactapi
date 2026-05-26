@@ -1,70 +1,168 @@
-# Getting Started with Create React App
+# 📋 Test React — Formulaire d'inscription avec tests automatisés
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> **Auteur :** Julio Tepixtle
 
-## Available Scripts
+Ce projet React a pour objectif de **générer et structurer des tests automatisés** à partir d'un formulaire d'inscription. Il illustre deux niveaux de tests : les **tests unitaires** sur les fonctions de validation métier, et les **tests d'intégration** sur le composant formulaire complet.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📁 Structure du projet
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+src/
+├── utils/
+│   ├── module.js           # Fonctions de validation métier
+│   └── module.test.js      # Tests unitaires
+├── RegistrationForm.js     # Composant formulaire React
+└── RegistrationForm.test.js # Tests d'intégration
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🔧 `utils/module.js` — Fonctions de validation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Ce fichier contient les **fonctions utilitaires de base** utilisées pour valider les données du formulaire. Chaque fonction est pure, indépendante et testable de manière isolée.
 
-### `npm run build`
+| Fonction | Description |
+|---|---|
+| `calculateAge(p)` | Calcule l'âge en années à partir d'un objet `{ birth: Date }` |
+| `isAdult(p)` | Retourne `true` si la personne a au moins 18 ans |
+| `isValidPostalCode(code)` | Valide un code postal français (exactement 5 chiffres) |
+| `isValidName(name)` | Valide un nom/prénom/ville (lettres, accents, tirets, apostrophes) |
+| `isValidEmail(email)` | Valide le format d'une adresse e-mail |
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🧪 `utils/module.test.js` — Tests unitaires
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Les tests unitaires couvrent **chaque cas possible** pour chacune des fonctions de validation. Ils sont organisés par `describe` block.
 
-### `npm run eject`
+### `calculateAge`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+| Test | Description |
+|---|---|
+| ✅ Date de naissance connue | Vérifie le calcul correct de l'âge pour une date réelle |
+| ❌ Aucun argument | Lance `"missing param p"` |
+| ❌ `birth` est une chaîne vide | Lance `"missing birth date"` |
+| ❌ `null` passé en argument | Lance `"missing param p"` |
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### `isAdult`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+| Test | Description |
+|---|---|
+| ✅ Né en 1990 | Retourne `true` (majeur) |
+| ❌ Né il y a 10 ans | Retourne `false` (mineur) |
+| ❌ Né il y a 17 ans | Retourne `false` (mineur) |
+| ✅ Né il y a exactement 18 ans | Retourne `true` (exactement majeur) |
+| ❌ Aucun argument | Lance `"missing param p"` |
+| ❌ Objet sans propriété `birth` | Lance `"missing birth date"` |
+| ❌ Date invalide (`new Date('invalid')`) | Lance `"missing birth date"` |
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### `isValidPostalCode`
 
-## Learn More
+| Test | Description |
+|---|---|
+| ✅ Codes standards (`75001`, `06000`, `13100`) | Retourne `true` |
+| ❌ Moins de 5 chiffres | Retourne `false` |
+| ❌ Plus de 5 chiffres | Retourne `false` |
+| ❌ Contient des lettres | Retourne `false` |
+| ❌ Chaîne vide | Retourne `false` |
+| ❌ Valeur non-string (nombre) | Retourne `false` |
+| ❌ Contient des espaces | Retourne `false` |
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### `isValidName`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+| Test | Description |
+|---|---|
+| ✅ Nom simple (`Dupont`) | Retourne `true` |
+| ✅ Caractères accentués (`Éléonore`, `Noël`…) | Retourne `true` |
+| ✅ Nom composé avec tiret (`Marie-Claire`) | Retourne `true` |
+| ✅ Nom avec apostrophe (`D'Artagnan`) | Retourne `true` |
+| ✅ Ville avec espace ou tiret (`Le Havre`, `Aix-en-Provence`) | Retourne `true` |
+| ✅ Ligatures `ç` et `œ` (`François`, `Cœur`) | Retourne `true` |
+| ❌ Contient un chiffre (`Dupont1`) | Retourne `false` |
+| ❌ Contient un caractère spécial (`!`, `@`…) | Retourne `false` |
+| ❌ Chaîne vide | Retourne `false` |
+| ❌ Chaîne composée uniquement d'espaces | Retourne `false` |
 
-### Code Splitting
+### `isValidEmail`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+| Test | Description |
+|---|---|
+| ✅ E-mails standards (`jean.dupont@gmail.com`) | Retourne `true` |
+| ✅ E-mail avec sous-domaine | Retourne `true` |
+| ✅ E-mail avec alias `+` (`user+tag@gmail.com`) | Retourne `true` |
+| ❌ Sans `@` | Retourne `false` |
+| ❌ Sans extension de domaine | Retourne `false` |
+| ❌ Contient des espaces | Retourne `false` |
+| ❌ Chaîne vide | Retourne `false` |
+| ❌ Valeur non-string (`null`) | Retourne `false` |
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🧩 `RegistrationForm.js` — Composant formulaire
 
-### Making a Progressive Web App
+`RegistrationForm` est un composant React qui affiche un **formulaire d'inscription** avec les champs suivants : Nom, Prénom, Adresse e-mail, Date de naissance, Ville et Code postal.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Il utilise les fonctions de `utils/module.js` pour valider les données en temps réel et présente les comportements suivants :
 
-### Advanced Configuration
+- **Validation à la volée** : les erreurs s'affichent uniquement après qu'un champ a été touché (`onBlur`).
+- **Bouton désactivé** : le bouton *S'inscrire* reste `disabled` tant que tous les champs ne sont pas valides.
+- **Toast de succès** : un message de confirmation s'affiche 4 secondes après une soumission réussie.
+- **Réinitialisation** : le formulaire est vidé après une soumission valide.
+- **Persistance** : les inscriptions sont sauvegardées dans le `localStorage` (clé `registrations`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🔬 `RegistrationForm.test.js` — Tests d'intégration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Ces tests utilisent **React Testing Library** (`render`, `fireEvent`, `screen`) pour simuler les interactions utilisateur sur le composant `RegistrationForm`. Ils réutilisent les mêmes règles de validation que `utils/module.js` et vérifient le comportement global du formulaire.
 
-### `npm run build` fails to minify
+### État du bouton de soumission
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+| Test | Description |
+|---|---|
+| ❌ Formulaire vide | Le bouton *S'inscrire* est `disabled` |
+| ✅ Tous les champs valides | Le bouton est activé |
+| ❌ Seulement certains champs remplis | Le bouton reste `disabled` |
+| ❌ Un champ valide est effacé | Le bouton redevient `disabled` |
+
+### Affichage des erreurs (après `blur`)
+
+| Test | Description |
+|---|---|
+| ❌ `nom` contient un chiffre | Affiche `"Nom invalide…"` avec la classe `.form-error` |
+| ❌ `email` est mal formé | Affiche `"e-mail invalide…"` avec la classe `.form-error` |
+| ❌ `codePostal` n'a pas 5 chiffres | Affiche `"Code postal invalide…"` avec la classe `.form-error` |
+| ❌ Personne de moins de 18 ans | Affiche `"…18 ans…"` avec la classe `.form-error` |
+| ❌ `prenom` contient un caractère spécial | Affiche `"Prénom invalide…"` avec la classe `.form-error` |
+| ❌ `ville` contient des chiffres | Affiche `"Ville invalide…"` avec la classe `.form-error` |
+| ✅ Aucun champ touché | Aucun message d'erreur ne s'affiche |
+
+### Comportement à la soumission
+
+| Test | Description |
+|---|---|
+| ✅ Soumission valide | Affiche un toast de succès avec le rôle `alert` et la classe `.toast-success` |
+| ✅ Soumission valide | Tous les champs sont vidés après soumission |
+| ✅ Soumission valide | Le bouton redevient `disabled` après soumission |
+| ✅ Soumission valide | L'entrée est sauvegardée dans `localStorage` avec les bonnes valeurs |
+| ✅ Soumissions multiples | Chaque inscription s'accumule dans `localStorage` |
+| ❌ Formulaire invalide | Rien n'est sauvegardé dans `localStorage` |
+| ❌ Soumission forcée invalide (via `fireEvent.submit`) | Aucune entrée créée, aucun toast affiché |
+
+### Gestion du timer du toast
+
+| Test | Description |
+|---|---|
+| ⏱️ `useEffect` cleanup | Le toast disparaît automatiquement après 4 secondes (`jest.useFakeTimers`) |
+
+---
+
+## 🚀 Lancer les tests
+
+```bash
+npm test
+```
+
+> Les tests sont exécutés avec **Jest** et **React Testing Library** (configurés par défaut avec Create React App).
