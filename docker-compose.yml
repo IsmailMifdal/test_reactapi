@@ -1,0 +1,56 @@
+version: '3.1'
+
+services:
+  db:
+    image: mysql:9.7
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: "mysql --user=${MYSQL_USER} --password=${MYSQL_ROOT_PASSWORD} --execute=\"SHOW DATABASES;\" || exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  adminer:
+    depends_on:
+      - db
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_HOST=db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    command: uvicorn server:app --proxy-headers --host 0.0.0.0 --port 8000
+
+  react:
+    build:
+      context: .
+      dockerfile: React/Dockerfile
+    restart: always
+    environment:
+      - REACT_APP_SERVER_PORT=8000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    command: npm start
