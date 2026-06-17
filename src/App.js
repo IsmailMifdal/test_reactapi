@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import RegistrationForm from './RegistrationForm';
-import axios from 'axios';
+import { countUsers } from './api';
 
 function Navbar({ showBack }) {
   return (
@@ -16,23 +16,13 @@ function Navbar({ showBack }) {
 }
 
 function HomePage() {
-  const port = process.env.REACT_APP_SERVER_PORT;
   const [usersCount, setUsersCount] = useState(0);
 
   useEffect(() => {
-    async function countUsers() {
-      try {
-        const api = axios.create({
-          baseURL: `http://localhost:${port}`
-        });
-        const response = await api.get('/users');
-        setUsersCount(response.data.utilisateurs.length);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    countUsers();
-  }, [port]);
+    countUsers()
+      .then(setUsersCount)
+      .catch(() => {});
+  }, []);
 
   return (
     <>
