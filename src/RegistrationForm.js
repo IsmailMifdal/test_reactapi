@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isAdult, isValidPostalCode, isValidName, isValidEmail } from './utils/module.js';
+import { createUser } from './api';
 
 
 const STORAGE_KEY = 'registrations';
@@ -11,6 +12,7 @@ const initialFormData = {
     dateNaissance: '',
     ville: '',
     codePostal: '',
+    password: '',
 };
 
 
@@ -43,6 +45,9 @@ function validate(data) {
     if (!isValidPostalCode(data.codePostal))
         errors.codePostal = 'Code postal invalide (5 chiffres).';
 
+    if (!data.password || data.password.length < 6)
+        errors.password = 'Mot de passe requis (6 caractères minimum).';
+
     return errors;
 }
 
@@ -74,13 +79,17 @@ function RegistrationForm() {
         setTouched((prev) => ({ ...prev, [name]: true }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isFormValid) return;
-        saveToLocalStorage(formData);
-        setToast(`Bienvenue ${formData.prenom} ${formData.nom} ! Inscription réussie 🎉`);
-        setFormData(initialFormData);
-        setTouched({});
+        try {
+            await createUser(formData);
+            setToast(`Bienvenue ${formData.prenom} ${formData.nom} ! Inscription réussie 🎉`);
+            setFormData(initialFormData);
+            setTouched({});
+        } catch (error) {
+            setToast(`Erreur lors de l'inscription : ${error.message}`);
+        }
     };
 
     useEffect(() => {
@@ -194,6 +203,20 @@ function RegistrationForm() {
                             <span className="form-error">{errors.codePostal}</span>
                         )}
                     </div>
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="password">Mot de passe</label>
+                    <input
+                        id="password" name="password" type="password"
+                        value={formData.password}
+                        onChange={handleChange} onBlur={handleBlur}
+                        placeholder="••••••"
+                        className={inputClass('password')}
+                    />
+                    {fieldError('password') && (
+                        <span className="form-error">{errors.password}</span>
+                    )}
                 </div>
 
                 <button type="submit" disabled={!isFormValid}>

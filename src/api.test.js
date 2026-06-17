@@ -23,4 +23,14 @@ describe('countUsers', () => {
       `http://localhost:3000/users`,
     );
   });
+
+  it('fetches erroneously data from an API', async () => {
+    const errorMessage = 'Network Error';
+
+    axios.get.mockImplementationOnce(() =>
+      Promise.reject(new Error(errorMessage)),
+    );
+
+    await expect(countUsers()).rejects.toThrow(errorMessage);
+  });
 });

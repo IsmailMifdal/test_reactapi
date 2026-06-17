@@ -1,7 +1,8 @@
 import mysql.connector
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
 origins = ["*"]
@@ -23,13 +24,34 @@ conn = mysql.connector.connect(
     host=os.getenv("MYSQL_HOST")
 )
 
+class User(BaseModel):
+    nom: str
+    prenom: str
+    dateNaissance: str
+    ville: str
+    codePostal: str
+    email: str
+    password: str
+
 @app.get("/users")
 async def get_users():
     cursor = conn.cursor()
-    sql_select_Query = "select * from users"
-    cursor.execute(sql_select_Query)
-    # get all records
+    cursor.execute("SELECT * FROM users")
     records = cursor.fetchall()
     print("Total number of rows in table: ", cursor.rowcount)
-    # renvoyer nos données et 200 code OK
     return {'utilisateurs': records}
+
+@app.post("/users", status_code=201)
+async def create_user(user: User):
+    try:
+        cursor = conn.cursor()
+        sql = """INSERT INTO users (nom, prenom, dateNaissance, ville, codePostal, email, password)
+                 VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(sql, (
+            user.nom, user.prenom, user.dateNaissance,
+            user.ville, user.codePostal, user.email, user.password
+        ))
+        conn.commit()
+        return {"message": "Utilisateur créé", "id": cursor.lastrowid}
+    except mysql.connector.IntegrityError:
+        raise HTTPException(status_code=409, detail="Email déjà utilisé")
