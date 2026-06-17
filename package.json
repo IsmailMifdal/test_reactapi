@@ -20,6 +20,7 @@
     "test": "react-scripts test --coverage --collectCoverageFrom=src/*js --collectCoverageFrom=!src/reportWebVitals.js --collectCoverageFrom=!src/index.js --watchAll=false",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
+    "cypress": "cypress open",
     "deploy": "gh-pages -d build",
     "jsdoc": "jsdoc -R ./README.md -c ./jsdoc.config.json -r -d ./public/docs",
     "build-npm-ci": "NODE_ENV=production && rm -rf dist && mkdir dist && npx babel src --out-dir dist --copy-files"
@@ -47,6 +48,7 @@
     "@babel/cli": "^7.29.7",
     "@babel/core": "^7.29.7",
     "@babel/plugin-transform-react-jsx": "^7.29.7",
+    "cypress": "^15.17.0",
     "gh-pages": "^6.3.0",
     "react-test-renderer": "^19.2.5"
   }
