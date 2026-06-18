@@ -219,7 +219,7 @@ function RegistrationForm() {
                     )}
                 </div>
 
-                <button type="submit" disabled={!isFormValid}>
+                <button type="submit" data-cy="btn-sync" disabled={!isFormValid}>
                     S'inscrire
                 </button>
             </form>

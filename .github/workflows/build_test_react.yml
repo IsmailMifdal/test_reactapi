@@ -37,11 +37,19 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Cypress run
+      - name: Cypress run (Online mode)
         uses: cypress-io/github-action@v6
         with:
           build: npm run build
           start: npm start
+
+      - name: Run Cypress tests (Offline mode)
+        uses: cypress-io/github-action@v6
+        with:
+          build: npm run build
+          start: npm start
+        env:
+          CYPRESS_offline: true
 
       - name: Generate JSDoc documentation
         run: npm run jsdoc
