@@ -1,16 +1,29 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import RegistrationForm from './RegistrationForm';
 
+// Mock createUser — l'inscription passe par l'API, pas le localStorage
+jest.mock('./api', () => ({
+  createUser: jest.fn().mockResolvedValue({ message: 'Utilisateur créé', id: 1 }),
+  countUsers: jest.fn().mockResolvedValue(0),
+  getUsers:   jest.fn().mockResolvedValue([]),
+  loginUser:  jest.fn().mockResolvedValue({}),
+  deleteUser: jest.fn().mockResolvedValue({}),
+}));
+
+// Le champ password est requis pour que le formulaire soit valide
 function fillValidForm() {
-  fireEvent.change(screen.getByLabelText('Nom'),               { target: { name: 'nom',           value: 'Tepixtle'               } });
-  fireEvent.change(screen.getByLabelText('Prénom'),            { target: { name: 'prenom',        value: 'Julio'                 } });
-  fireEvent.change(screen.getByLabelText('Adresse e-mail'),    { target: { name: 'email',         value: 'Julio.Tepixtle@gmail.com'} });
-  fireEvent.change(screen.getByLabelText('Date de naissance'), { target: { name: 'dateNaissance', value: '1990-01-01'           } });
-  fireEvent.change(screen.getByLabelText('Ville'),             { target: { name: 'ville',         value: 'Paris'                } });
-  fireEvent.change(screen.getByLabelText('Code postal'),       { target: { name: 'codePostal',    value: '75001'               } });
+  fireEvent.change(screen.getByLabelText('Nom'),               { target: { name: 'nom',           value: 'Tepixtle'                } });
+  fireEvent.change(screen.getByLabelText('Prénom'),            { target: { name: 'prenom',        value: 'Julio'                   } });
+  fireEvent.change(screen.getByLabelText('Adresse e-mail'),    { target: { name: 'email',         value: 'Julio.Tepixtle@gmail.com' } });
+  fireEvent.change(screen.getByLabelText('Date de naissance'), { target: { name: 'dateNaissance', value: '1990-01-01'              } });
+  fireEvent.change(screen.getByLabelText('Ville'),             { target: { name: 'ville',         value: 'Paris'                   } });
+  fireEvent.change(screen.getByLabelText('Code postal'),       { target: { name: 'codePostal',    value: '75001'                  } });
+  fireEvent.change(screen.getByLabelText('Mot de passe'),      { target: { name: 'password',      value: 'motdepasse123'           } });
 }
 
 const submitBtn = () => screen.getByRole('button', { name: /s'inscrire/i });
+
+// ── Validation du bouton submit ─────────────────────────────────────────────
 
 test('submit button is disabled when the form is empty', () => {
   render(<RegistrationForm />);
@@ -36,6 +49,7 @@ test('submit button becomes disabled again if a valid field is cleared', () => {
   expect(submitBtn()).toBeDisabled();
 });
 
+// ── Messages d'erreur de validation ────────────────────────────────────────
 
 test('shows a red error when nom contains digits after blur', () => {
   render(<RegistrationForm />);
@@ -104,20 +118,21 @@ test('does not show errors before the user touches any field', () => {
   expect(screen.queryByText(/code postal invalide/i)).not.toBeInTheDocument();
 });
 
+// ── Soumission du formulaire (async, via API) ───────────────────────────────
 
-test('displays a success toaster after a valid submit', () => {
+test('displays a success toast after a valid submit', async () => {
   render(<RegistrationForm />);
   fillValidForm();
-  fireEvent.click(submitBtn());
-  const alert = screen.getByRole('alert');
+  await act(async () => { fireEvent.click(submitBtn()); });
+  const alert = await screen.findByRole('alert');
   expect(alert).toBeInTheDocument();
   expect(alert).toHaveClass('toast-success');
 });
 
-test('clears all fields after a valid submit', () => {
+test('clears all fields after a valid submit', async () => {
   render(<RegistrationForm />);
   fillValidForm();
-  fireEvent.click(submitBtn());
+  await act(async () => { fireEvent.click(submitBtn()); });
   expect(screen.getByLabelText('Nom')).toHaveValue('');
   expect(screen.getByLabelText('Prénom')).toHaveValue('');
   expect(screen.getByLabelText('Adresse e-mail')).toHaveValue('');
@@ -125,59 +140,35 @@ test('clears all fields after a valid submit', () => {
   expect(screen.getByLabelText('Code postal')).toHaveValue('');
 });
 
-test('submit button is disabled again after a successful submit', () => {
+test('submit button is disabled again after a successful submit', async () => {
   render(<RegistrationForm />);
   fillValidForm();
-  fireEvent.click(submitBtn());
+  await act(async () => { fireEvent.click(submitBtn()); });
   expect(submitBtn()).toBeDisabled();
-});
-
-
-test('saves the registration to localStorage on valid submit', () => {
-  localStorage.clear();
-  render(<RegistrationForm />);
-  fillValidForm();
-  fireEvent.click(submitBtn());
-  const saved = JSON.parse(localStorage.getItem('registrations'));
-  expect(saved).toHaveLength(1);
-  expect(saved[0].nom).toBe('Tepixtle');
-  expect(saved[0].prenom).toBe('Julio');
-  expect(saved[0].email).toBe('Julio.Tepixtle@gmail.com');
-  expect(saved[0].codePostal).toBe('75001');
-});
-
-test('accumulates multiple registrations in localStorage', () => {
-  localStorage.clear();
-  render(<RegistrationForm />);
-  fillValidForm();
-  fireEvent.click(submitBtn());
-  fillValidForm();
-  fireEvent.click(submitBtn());
-  const saved = JSON.parse(localStorage.getItem('registrations'));
-  expect(saved).toHaveLength(2);
-});
-
-test('does not save to localStorage when the form is invalid', () => {
-  localStorage.clear();
-  render(<RegistrationForm />);
-  expect(submitBtn()).toBeDisabled();
-  expect(localStorage.getItem('registrations')).toBeNull();
 });
 
 test('handleSubmit guard: submitting an invalid form does nothing', () => {
-  localStorage.clear();
   render(<RegistrationForm />);
   fireEvent.submit(screen.getByRole('form', { name: /inscription/i }));
-  expect(localStorage.getItem('registrations')).toBeNull();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 
-test('useEffect cleanup: re-submitting clears the previous toast timer', () => {
+test('shows an error toast when createUser fails', async () => {
+  const { createUser } = require('./api');
+  createUser.mockRejectedValueOnce(new Error('Serveur indisponible'));
+  render(<RegistrationForm />);
+  fillValidForm();
+  await act(async () => { fireEvent.click(submitBtn()); });
+  const alert = await screen.findByRole('alert');
+  expect(alert).toHaveTextContent(/Serveur indisponible/i);
+});
+
+test('useEffect cleanup: toast disappears after 4 seconds', async () => {
   jest.useFakeTimers();
   render(<RegistrationForm />);
   fillValidForm();
-  fireEvent.click(submitBtn());
-  expect(screen.getByRole('alert')).toBeInTheDocument();
+  await act(async () => { fireEvent.click(submitBtn()); });
+  expect(await screen.findByRole('alert')).toBeInTheDocument();
   act(() => { jest.advanceTimersByTime(4001); });
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   jest.useRealTimers();

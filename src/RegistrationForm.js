@@ -3,7 +3,6 @@ import { isAdult, isValidPostalCode, isValidName, isValidEmail } from './utils/m
 import { createUser } from './api';
 
 
-const STORAGE_KEY = 'registrations';
 
 const initialFormData = {
     nom: '',
@@ -52,12 +51,6 @@ function validate(data) {
 }
 
 
-
-function saveToLocalStorage(entry) {
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    existing.push({ ...entry, registeredAt: new Date().toISOString() });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-}
 
 
 function RegistrationForm() {
