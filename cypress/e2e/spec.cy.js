@@ -1,10 +1,16 @@
 describe('Home page spec', () => {
   it('deployed react app to localhost', () => {
-    cy.visit('http://localhost:3000')
-    cy.contains('1 user(s) already registered')
+    // Intercept la requête API pour simuler 1 utilisateur inscrit (pas de backend en CI)
+    cy.intercept('GET', '**/users', {
+      statusCode: 200,
+      body: { utilisateurs: [{ id: 1, nom: 'Test', prenom: 'User', email: 'test@test.fr', ville: 'Paris', is_admin: 0 }] }
+    }).as('getUsers');
 
-  })
-})
+    cy.visit('http://localhost:3000');
+    cy.wait('@getUsers');
+    cy.contains('1 user(s) already registered');
+  });
+});
 
 describe('Tests en mode Offline', () => {
   // Remplissage du formulaire avant de soumettre
@@ -44,7 +50,7 @@ describe('Tests en mode Offline', () => {
 
     cy.log('Mode offline activé !');
 
-    cy.intercept('POST', '/users', { forceNetworkError: true }).as('syncRequest');
+    cy.intercept('POST', '**/users', { forceNetworkError: true }).as('syncRequest');
 
     cy.get('[data-cy="btn-sync"]').click();
 

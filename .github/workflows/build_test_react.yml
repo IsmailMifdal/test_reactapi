@@ -42,14 +42,17 @@ jobs:
         with:
           build: npm run build
           start: npm start
+        env:
+          # Le frontend appelle le backend Vercel de production en mode online
+          REACT_APP_API_URL: ${{ secrets.VERCEL_BACKEND_URL }}
 
       - name: Run Cypress tests (Offline mode)
         uses: cypress-io/github-action@v6
         with:
-          build: npm run build
           start: npm start
         env:
           CYPRESS_offline: true
+          REACT_APP_API_URL: http://localhost:8000
 
       - name: Generate JSDoc documentation
         run: npm run jsdoc

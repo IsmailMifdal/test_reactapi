@@ -1,6 +1,8 @@
 import axios from 'axios';
-const port = process.env.REACT_APP_SERVER_PORT;
-const API = `http://localhost:${port}`;
+
+// En local : http://localhost:8000 (via .env)
+// En production : URL du backend Vercel (via variable d'env Vercel/GitHub Actions)
+const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const countUsers = async () => {
     try {

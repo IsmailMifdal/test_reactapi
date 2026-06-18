@@ -9,7 +9,7 @@ describe('countUsers', () => {
     const data = { data: { utilisateurs: [mockUser] } };
     axios.get.mockImplementationOnce(() => Promise.resolve(data));
     await expect(countUsers()).resolves.toEqual(1);
-    expect(axios.get).toHaveBeenCalledWith(`http://localhost:3000/users`);
+    expect(axios.get).toHaveBeenCalledWith(`http://localhost:8000/users`);
   });
 
   it('fetches erroneously data from an API', async () => {
