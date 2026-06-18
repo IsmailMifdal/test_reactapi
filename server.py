@@ -22,14 +22,20 @@ def get_connection():
     Nécessaire en environnement serverless (Vercel) où les connexions
     persistantes ne sont pas maintenues entre les invocations.
     """
-    return mysql.connector.connect(
-        database=os.getenv("MYSQL_DATABASE"),
-        user=os.getenv("MYSQL_USER"),
-        password=os.getenv("MYSQL_ROOT_PASSWORD"),
-        port=int(os.getenv("MYSQL_PORT", "3306")),
-        host=os.getenv("MYSQL_HOST"),
-        connect_timeout=10,
-    )
+    try:
+        return mysql.connector.connect(
+            database=os.getenv("MYSQL_DATABASE"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_ROOT_PASSWORD"),
+            port=int(os.getenv("MYSQL_PORT", "3306")),
+            host=os.getenv("MYSQL_HOST"),
+            connect_timeout=10,
+        )
+    except mysql.connector.Error as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database connection failed: {e}"
+        )
 
 
 class User(BaseModel):
