@@ -31,3 +31,23 @@ export const createUser = async (userData) => {
         throw error;
     }
 }
+
+export const loginUser = async (credentials) => {
+    try {
+        const response = await axios.post(`${API}/login`, credentials);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export const deleteUser = async (userId) => {
+    try {
+        const response = await axios.delete(`${API}/users/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}

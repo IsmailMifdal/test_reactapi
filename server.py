@@ -33,6 +33,27 @@ class User(BaseModel):
     email: str
     password: str
 
+class LoginUser(BaseModel):
+    email: str
+    password: str
+
+@app.on_event("startup")
+async def startup_event():
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    if admin_email and admin_password:
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users WHERE email = %s", (admin_email,))
+            if not cursor.fetchone():
+                sql = """INSERT INTO users (nom, prenom, dateNaissance, ville, codePostal, email, password, is_admin)
+                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+                cursor.execute(sql, ("Admin", "Admin", "1970-01-01", "AdminCity", "00000", admin_email, admin_password, 1))
+                conn.commit()
+                print(f"Admin user {admin_email} created successfully.")
+        except Exception as e:
+            print(f"Error creating admin user: {e}")
+
 @app.get("/users")
 async def get_users():
     cursor = conn.cursor(dictionary=True)
@@ -55,3 +76,21 @@ async def create_user(user: User):
         return {"message": "Utilisateur créé", "id": cursor.lastrowid}
     except mysql.connector.IntegrityError:
         raise HTTPException(status_code=409, detail="Email déjà utilisé")
+
+@app.post("/login")
+async def login(user: LoginUser):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users WHERE email = %s AND password = %s", (user.email, user.password))
+    db_user = cursor.fetchone()
+    if not db_user:
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+    return {"message": "Connexion réussie", "user": db_user}
+
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: int):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    conn.commit()
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    return {"message": "Utilisateur supprimé"}

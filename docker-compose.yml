@@ -41,6 +41,8 @@ services:
       - MYSQL_USER
       - MYSQL_ROOT_PASSWORD
       - MYSQL_HOST=db
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     ports:
       - "8000:8000"
     depends_on:
