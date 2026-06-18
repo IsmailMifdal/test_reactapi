@@ -40,15 +40,20 @@ jobs:
       - name: Cypress run (Online mode)
         uses: cypress-io/github-action@v6
         with:
+          install: false          # npm ci déjà fait dans "Install dependencies"
           build: npm run build
           start: npm start
         env:
           # Le frontend appelle le backend Vercel de production en mode online
           REACT_APP_API_URL: ${{ secrets.VERCEL_BACKEND_URL }}
 
+      - name: Clean build cache before offline run
+        run: rm -rf node_modules/.cache
+
       - name: Run Cypress tests (Offline mode)
         uses: cypress-io/github-action@v6
         with:
+          install: false          # npm ci déjà fait, cache nettoyé ci-dessus
           start: npm start
         env:
           CYPRESS_offline: true
