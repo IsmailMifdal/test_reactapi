@@ -15,7 +15,7 @@ describe('Home page spec', () => {
 describe('Tests en mode Offline', () => {
   // Remplissage du formulaire avant de soumettre
   beforeEach(() => {
-    cy.visit('http://localhost:3000/register');
+    cy.visit('http://localhost:3000/#/register');
     cy.get('input[name="nom"]').type('Doe');
     cy.get('input[name="prenom"]').type('John');
     cy.get('input[name="email"]').type('john.doe@example.com');

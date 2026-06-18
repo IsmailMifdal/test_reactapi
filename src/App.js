@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import RegistrationForm from './RegistrationForm';
 import LoginForm from './LoginForm';
@@ -153,13 +153,13 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<HomePage currentUser={currentUser} onLogout={handleLogout} />} />
         <Route path="/register" element={<RegisterPage currentUser={currentUser} onLogout={handleLogout} />} />
         <Route path="/login" element={<LoginPage setCurrentUser={setCurrentUser} />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
