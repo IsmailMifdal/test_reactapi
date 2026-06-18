@@ -118,6 +118,16 @@ test('does not show errors before the user touches any field', () => {
   expect(screen.queryByText(/code postal invalide/i)).not.toBeInTheDocument();
 });
 
+test('shows a red error when password is too short after blur', () => {
+  render(<RegistrationForm />);
+  const input = screen.getByLabelText('Mot de passe');
+  fireEvent.change(input, { target: { name: 'password', value: '123' } });
+  fireEvent.blur(input);
+  const err = screen.getByText(/mot de passe requis/i);
+  expect(err).toBeInTheDocument();
+  expect(err).toHaveClass('form-error');
+});
+
 // ── Soumission du formulaire (async, via API) ───────────────────────────────
 
 test('displays a success toast after a valid submit', async () => {

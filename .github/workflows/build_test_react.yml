@@ -172,7 +172,7 @@ jobs:
         run: docker ps
 
       - name: Wait for services to be healthy
-        run: sleep 90
+        run: sleep 10
 
       - name: Check db health
         run: |
@@ -196,6 +196,8 @@ jobs:
 
       - name: Tests end-to-end
         uses: cypress-io/github-action@v6
+        with:
+          install: false    # node_modules déjà présents via le cache du runner
         env:
           CYPRESS_BASE_URL: http://localhost:3000
           CYPRESS_e2e: true
