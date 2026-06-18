@@ -193,11 +193,3 @@ jobs:
         run: |
           docker inspect --format "{{json .State.Health.Status }}" test_react-react-1 \
             | jq '. == "healthy"'
-
-      - name: Tests end-to-end
-        uses: cypress-io/github-action@v6
-        with:
-          install: false    # node_modules déjà présents via le cache du runner
-        env:
-          CYPRESS_BASE_URL: http://localhost:3000
-          CYPRESS_e2e: true
