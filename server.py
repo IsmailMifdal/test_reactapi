@@ -30,6 +30,9 @@ def get_connection():
             port=int(os.getenv("MYSQL_PORT", "3306")),
             host=os.getenv("MYSQL_HOST"),
             connect_timeout=10,
+            ssl_disabled=False,         # Requis pour Railway (connexions externes via SSL)
+            ssl_verify_cert=False,      # Pas besoin de vérifier le certificat Railway
+            ssl_verify_identity=False,
         )
     except mysql.connector.Error as e:
         raise HTTPException(
