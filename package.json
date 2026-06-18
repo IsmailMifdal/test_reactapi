@@ -52,5 +52,10 @@
     "cypress": "^15.17.0",
     "gh-pages": "^6.3.0",
     "react-test-renderer": "^19.2.5"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!axios)/"
+    ]
   }
 }

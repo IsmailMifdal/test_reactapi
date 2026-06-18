@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import RegistrationForm from './RegistrationForm';
-import { countUsers } from './api';
+import { countUsers, getUsers } from './api';
 
 function Navbar({ showBack }) {
   return (
@@ -17,10 +17,15 @@ function Navbar({ showBack }) {
 
 function HomePage() {
   const [usersCount, setUsersCount] = useState(0);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     countUsers()
       .then(setUsersCount)
+      .catch(() => {});
+    
+    getUsers()
+      .then(setUsers)
       .catch(() => {});
   }, []);
 
@@ -28,12 +33,37 @@ function HomePage() {
     <>
       <Navbar showBack={false} />
       <div className="page">
-        <div className="home-card">
+        <div className="home-card list-card">
           <h1>Users Manager</h1>
           <p className="stat">
             <strong>{usersCount}</strong> user(s) already registered
           </p>
           <Link to="/register" className="btn-primary">S'inscrire →</Link>
+
+          {users.length > 0 && (
+            <div className="table-container">
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Ville</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user, index) => (
+                    <tr key={user.id || index}>
+                      <td>{user.nom}</td>
+                      <td>{user.prenom}</td>
+                      <td>{user.email}</td>
+                      <td>{user.ville}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </>

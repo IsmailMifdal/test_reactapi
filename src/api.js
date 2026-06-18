@@ -12,6 +12,16 @@ export const countUsers = async () => {
     }
 }
 
+export const getUsers = async () => {
+    try {
+        const response = await axios.get(`${API}/users`);
+        return response.data.utilisateurs;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
 export const createUser = async (userData) => {
     try {
         const response = await axios.post(`${API}/users`, userData);

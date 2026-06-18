@@ -35,7 +35,7 @@ class User(BaseModel):
 
 @app.get("/users")
 async def get_users():
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users")
     records = cursor.fetchall()
     print("Total number of rows in table: ", cursor.rowcount)
