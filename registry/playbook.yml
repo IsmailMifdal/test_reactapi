@@ -19,6 +19,7 @@
           - docker-compose-v2
           - apache2-utils  # Pour htpasswd
           - python3-passlib
+          - openssl        # Pour le certificat SSL auto-signe
         state: present
 
     - name: Ajout de l'utilisateur ubuntu au groupe docker
@@ -38,6 +39,8 @@
         - "{{ project_dir }}"
         - "{{ project_dir }}/auth"
         - "{{ project_dir }}/data"
+        - "{{ project_dir }}/nginx"
+        - "{{ project_dir }}/nginx/certs"
 
     # ----------------------------------------------------------
     # 3. AUTH (MOT DE PASSE)
@@ -51,6 +54,39 @@
         group: ubuntu
         mode: 0640
         crypt_scheme: bcrypt
+
+    # ----------------------------------------------------------
+    # 4. CERTIFICAT SSL AUTO-SIGNE (genere a la volee sur le serveur)
+    #    CN = IP publique de l'instance, commande non-interactive (-subj)
+    # ----------------------------------------------------------
+    - name: Generation du certificat SSL auto-signe (non-interactif)
+      command: >
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048
+        -keyout {{ project_dir }}/nginx/certs/nginx.key
+        -out {{ project_dir }}/nginx/certs/nginx.crt
+        -subj "/CN={{ public_ip }}"
+        -addext "subjectAltName=IP:{{ public_ip }}"
+      args:
+        creates: "{{ project_dir }}/nginx/certs/nginx.crt"
+
+    - name: Permissions sur les certificats
+      file:
+        path: "{{ project_dir }}/nginx/certs"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        recurse: yes
+
+    # ----------------------------------------------------------
+    # 5. CONFIGURATION NGINX (reverse proxy + routage /v2/ et /)
+    # ----------------------------------------------------------
+    - name: Generation du nginx.conf depuis le template
+      template:
+        src: nginx.conf
+        dest: "{{ project_dir }}/nginx/nginx.conf"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
 
     - name: Copie du docker-compose.yml
       template:

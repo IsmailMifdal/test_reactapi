@@ -43,8 +43,14 @@ resource "local_file" "ssh_key" {
 }
 
 resource "aws_security_group" "registry_sg" {
-    name        = "registry-sg-simple"
-    description = "Allow SSH, HTTP (UI), Registry (5000)"
+    name_prefix = "registry-sg-"
+    description = "Allow SSH, HTTP (redirect to HTTPS) and HTTPS"
+
+    # Permet de remplacer le SG sans blocage DependencyViolation :
+    # le nouveau SG est cree et attache a l'instance avant la suppression de l'ancien.
+    lifecycle {
+        create_before_destroy = true
+    }
 
     ingress {
         description = "SSH"
@@ -54,8 +60,9 @@ resource "aws_security_group" "registry_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
+    # Port 80 gardé uniquement pour la redirection HTTP -> HTTPS dans Nginx
     ingress {
-        description = "Registry UI"
+        description = "HTTP (redirect to HTTPS)"
         from_port   = 80
         to_port     = 80
         protocol    = "tcp"
@@ -63,9 +70,9 @@ resource "aws_security_group" "registry_sg" {
     }
 
     ingress {
-        description = "Registry Docker API"
-        from_port   = 5000
-        to_port     = 5000
+        description = "HTTPS"
+        from_port   = 443
+        to_port     = 443
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
