@@ -55,16 +55,6 @@
         mode: 0640
         crypt_scheme: bcrypt
 
-    - name: Génération mot de passe nginx auth_basic (apr1, compatible nginx)
-      htpasswd:
-        path: "{{ project_dir }}/auth/nginx.htpasswd"
-        name: admin
-        password: admin123
-        owner: ubuntu
-        group: ubuntu
-        mode: 0644
-        crypt_scheme: apr_md5_crypt
-
     # ----------------------------------------------------------
     # 4. CERTIFICAT SSL AUTO-SIGNE (genere a la volee sur le serveur)
     #    CN = IP publique de l'instance, commande non-interactive (-subj)
